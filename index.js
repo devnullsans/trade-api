@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { login, logout, collect } = require("./smartapi");
-const { setClient, updateValues } = require("./gsheet");
+const { setClient, updateValues, calculateValues, generateLimits } = require("./gsheet");
 
 async function main() {
   try {
@@ -22,7 +22,6 @@ async function main() {
     await setClient();
 
     const update = await updateValues(
-      "ROWS",
       `Data!2:${data.length + 1}`,
       data.map((d) => {
         d[0] = d[0].slice(0, 10);
@@ -30,7 +29,15 @@ async function main() {
       })
     );
 
-    console.log(update.data);
+    console.log(update.data, update.status, update.statusText);
+
+    const average = await calculateValues(data[0].length, data.length + 1, "E", "F");
+
+    console.log(average.data, average.status, average.statusText);
+
+    const generate = await generateLimits("K2:L2", 250, 250, "E", "J");
+
+    console.log(generate.data, generate.status, generate.statusText);
   } catch (error) {
     console.error(error);
   }
