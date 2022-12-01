@@ -8,7 +8,7 @@ async function main() {
 
     const data = await collect({
       exchange: "NSE",
-      symboltoken: "16669",
+      symboltoken: "2885",
       interval: "ONE_DAY",
       fromdate: "2021-08-22 09:00",
       todate: "2022-11-25 15:30"
@@ -34,10 +34,6 @@ async function main() {
     const average = await calculateValues(data[0].length, data.length + 1, "E", "F");
 
     console.log(average.data, average.status, average.statusText);
-
-    const generate = await generateLimits("K2:L2", 250, 250, "E", "J");
-
-    console.log(generate.data, generate.status, generate.statusText);
   } catch (error) {
     console.error(error);
   }

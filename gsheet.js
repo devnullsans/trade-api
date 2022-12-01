@@ -28,7 +28,7 @@ async function updateValues(range, values) {
     spreadsheetId: process.env.SHEETID,
     auth: client,
     range,
-    valueInputOption: "RAW",
+    valueInputOption: "USER_ENTERED",
     requestBody: {
       range,
       values
@@ -110,23 +110,24 @@ async function calculateValues(firstCol, lastRow, closeSym, volumeSym) {
     }
   });
 }
-//                          "K2:L2",    250,      250,      "E",        "J"
-async function generateLimits(range, endRow, spanCols, closeSym, percentSym) {
+//                          "K2:L2",    250,      250,      "E",       "J"
+async function generateLimits(range, endRow, spanCols, closeSym, returnSym) {
   return await sheets.spreadsheets.values.update({
     spreadsheetId: process.env.SHEETID,
     auth: client,
     range,
     valueInputOption: "USER_ENTERED",
+    includeValuesInResponse: true,
     requestBody: {
       range,
       values: [
         [
-          `=STDEV(${percentSym}${endRow - spanCols + 3}:${percentSym}${
+          `=${closeSym}${endRow + 1}*(1+(((STDEV.S(${returnSym}${endRow - spanCols + 3}:${returnSym}${
             endRow + 1
-          })+AVERAGEA(${closeSym}${endRow - spanCols + 2}:${closeSym}${endRow + 1})`,
-          `=STDEV(${percentSym}${endRow - spanCols + 3}:${percentSym}${
+          })*SQRT(100))+(AVERAGEA(${returnSym}${endRow - spanCols + 3}:${returnSym}${endRow + 1})*100))/100))`,
+          `=${closeSym}${endRow + 1}*(1-(((STDEV.S(${returnSym}${endRow - spanCols + 3}:${returnSym}${
             endRow + 1
-          })-AVERAGEA(${closeSym}${endRow - spanCols + 2}:${closeSym}${endRow + 1})`
+          })*SQRT(100))-(AVERAGEA(${returnSym}${endRow - spanCols + 3}:${returnSym}${endRow + 1})*100))/100))`
         ]
       ]
     }
