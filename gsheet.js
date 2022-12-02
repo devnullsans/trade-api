@@ -100,7 +100,7 @@ async function calculateValues(firstCol, lastRow, closeSym, volumeSym) {
             },
             cell: {
               userEnteredValue: {
-                formulaValue: `=((${closeSym}3-${closeSym}2)/${closeSym}2)*100`
+                formulaValue: `=LN(${closeSym}3/${closeSym}2)`
               }
             },
             fields: "userEnteredValue"
@@ -110,8 +110,8 @@ async function calculateValues(firstCol, lastRow, closeSym, volumeSym) {
     }
   });
 }
-//                          "K2:L2",    250,      250,      "E",       "J"
-async function generateLimits(range, endRow, spanCols, closeSym, returnSym) {
+//                          "K2:L2",    250,      250,       30,      "E",       "J"
+async function generateLimits(range, endRow, spanCols, forcDays, closeSym, returnSym) {
   return await sheets.spreadsheets.values.update({
     spreadsheetId: process.env.SHEETID,
     auth: client,
@@ -122,12 +122,12 @@ async function generateLimits(range, endRow, spanCols, closeSym, returnSym) {
       range,
       values: [
         [
-          `=${closeSym}${endRow + 1}*(1+(((STDEV.S(${returnSym}${endRow - spanCols + 3}:${returnSym}${
+          `=${closeSym}${endRow + 1}*EXP((AVERAGEA(${returnSym}${endRow - spanCols + 3}:${returnSym}${
             endRow + 1
-          })*SQRT(100))+(AVERAGEA(${returnSym}${endRow - spanCols + 3}:${returnSym}${endRow + 1})*100))/100))`,
-          `=${closeSym}${endRow + 1}*(1-(((STDEV.S(${returnSym}${endRow - spanCols + 3}:${returnSym}${
+          })*${forcDays})+(STDEV(${returnSym}${endRow - spanCols + 3}:${returnSym}${endRow + 1})*SQRT(${forcDays})))`,
+          `=${closeSym}${endRow + 1}*EXP((AVERAGEA(${returnSym}${endRow - spanCols + 3}:${returnSym}${
             endRow + 1
-          })*SQRT(100))-(AVERAGEA(${returnSym}${endRow - spanCols + 3}:${returnSym}${endRow + 1})*100))/100))`
+          })*${forcDays})-(STDEV(${returnSym}${endRow - spanCols + 3}:${returnSym}${endRow + 1})*SQRT(${forcDays})))`
         ]
       ]
     }

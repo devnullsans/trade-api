@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { login, logout, collect } = require("./smartapi");
-const { setClient, updateValues, calculateValues, generateLimits } = require("./gsheet");
+const { setClient, updateValues, calculateValues } = require("./gsheet");
 
 async function main() {
   try {
@@ -8,9 +8,9 @@ async function main() {
 
     const data = await collect({
       exchange: "NSE",
-      symboltoken: "2885",
-      interval: "ONE_DAY",
-      fromdate: "2021-08-22 09:00",
+      symboltoken: "11483",
+      interval: "ONE_HOUR",
+      fromdate: "2022-06-27 09:00",
       todate: "2022-11-25 15:30"
     });
 

@@ -5,19 +5,19 @@ async function main() {
   try {
     await setClient();
 
-    const data = await getValues(`Data!A251:I315`);
+    const data = await getValues(`Data!A251:I501`);
 
-    console.log("Data!A251:I260", data.status, data.statusText);
+    console.log("Data!A251:I501", data.status, data.statusText);
 
     if (data.status === 200) {
-      simulate(data.data.values, 250, "0", 0);
+      simulate(data.data.values, 250, "0");
     }
   } catch (error) {
     console.error(error);
   }
 }
 
-async function simulate(data, index, shares, last) {
+async function simulate(data, index, shares, uplt, lwlt, last) {
   if (data.length === 0) return;
 
   const slice = data.shift();
@@ -26,14 +26,14 @@ async function simulate(data, index, shares, last) {
 
   switch (shares) {
     case "0":
-      const generate = await generateLimits("Data!K2:L2", index, 250, "E", "J");
-      console.log(index, generate.status, generate.statusText);
+      const generate = await generateLimits("Data!K2:L2", index, 250, 30, "E", "J");
+      console.log(generate.status, generate.statusText);
       if (generate.status !== 200) throw new Error("Error while Generating Limits", { cause: generate });
-      const [[uplt, lwlt]] = generate.data.updatedData.values;
+      [[uplt, lwlt]] = generate.data.updatedData.values;
 
       if (volume > average14) {
         // Buy at zero
-        if (average20 > average40 && close > average20 && close > average40 && close < lwlt) {
+        if (average20 > average40 && close > average20 && close > average40 /* && close < lwlt */) {
           console.log(`${timestamp} - B>S at ${close} and ${volume}`);
           // index = index + 1;
           last = close;
@@ -41,7 +41,7 @@ async function simulate(data, index, shares, last) {
           await updateValues(`Data!L${index + 1}`, [[shares]]);
         }
         // Sell at zero
-        if (average20 < average40 && close < average20 && close < average40 && close > uplt) {
+        if (average20 < average40 && close < average20 && close < average40 /* && close > uplt */) {
           console.log(`${timestamp} - S>B at ${close} and ${volume}`);
           // index = index + 1;
           last = close;
@@ -74,8 +74,8 @@ async function simulate(data, index, shares, last) {
       break;
   }
 
-  console.log(shares);
-  setTimeout(() => simulate(data, index + 1, shares, last), 15e2);
+  console.log(data.length, index, shares, uplt, lwlt, last);
+  setTimeout(() => simulate(data, index + 1, shares, uplt, lwlt, last), 1e3);
 }
 
 main();
